@@ -1,21 +1,22 @@
 // server/server.js
-const express = require("express");
-const next = require("next");
-const path = require("path");
 
-const dev = process.env.NODE_ENV !== "production";
+import express from "express";
+import path from "path";
+import next from "next";
+import task from "./data/mock.js";
+
+const dev = true;
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
 
-  // API 라우트 설정
-  server.get("/api/hello", (req, res) => {
-    console.log("Received request for /api/hello");
-    res.json({ message: "Hello from Express!" });
+  server.get("/api/task", (req, res) => {
+    res.send(task);
   });
-  // Next.js 요청 핸들러
+
+  // Next.js 페이지 요청 처리
   server.all("*", (req, res) => {
     return handle(req, res);
   });
