@@ -1,14 +1,33 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import api from "./api/api";
 
-export default function Home() {
-  let size: [number, number] = [2, 7];
+export default function Page() {
+  const [data, setData] = useState<any>(null);
+  console.log("🚀 ~ Home ~ data:", data);
 
   useEffect(() => {
-    console.log("사이즈를 어떻게 나타내는지", size.join(","));
+    const getTasks = async () => {
+      try {
+        const response = await api.get("/task");
+        setData(response.data);
+      } catch (error) {
+        console.error("에러발생", error);
+      }
+    };
+    getTasks();
   }, []);
 
-  return <div>안녕 콘솔확인해봐</div>;
-}
+  if (!data) {
+    return <div>Loading...</div>;
+  }
 
+  return (
+    <div>
+      {data.map((task: any) => (
+        <div key={task.id}>{task.title}</div> // key prop 사용
+      ))}
+    </div>
+  );
+}
