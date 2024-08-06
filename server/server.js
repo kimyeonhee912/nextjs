@@ -3,7 +3,7 @@
 import express from "express";
 import path from "path";
 import next from "next";
-import task from "./data/mock.js";
+import tasks from "./data/mock.js";
 
 const dev = true;
 const app = next({ dev });
@@ -11,6 +11,7 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
   const server = express();
+  server.use(express.json());
 
   /* 쿼리 스트링 */
   server.get("/api/task", (req, res) => {
@@ -23,7 +24,7 @@ app.prepare().then(() => {
           ? (a, b) => a.createdAt - b.createdAt // 오래된 순
           : (a, b) => b.createdAt - a.createdAt; // 최신 순
 
-      let newTasks = task.sort(compareFn);
+      let newTasks = tasks.sort(compareFn);
 
       // 정렬 후 개수 처리함. count 값이 있을 경우에는.
       if (count) {
@@ -31,8 +32,32 @@ app.prepare().then(() => {
       }
       res.send(newTasks);
     } else {
-      res.send(task);
+      res.send(tasks);
     }
+  });
+
+  /* 다이나믹 URL */
+  server.get("/api/task/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const task = tasks.find((task) => task.id === id);
+    if (task) {
+      res.send(task);
+    } else {
+      res.status(404).send({ message: "cannot find given id" });
+    }
+  });
+
+  /* POST 요청 - DB 연결 전 */
+  server.post("/api/task", (req, res) => {
+    const newContent = req.body;
+    const ids = tasks.map((task) => task.id);
+    newContent.id = Math.max(...ids) + 1;
+    newContent.isComplete = false;
+    newContent.createdAt = new Date();
+    newContent.updatedAt = new Date();
+
+    tasks.push(newContent);
+    res.status(201).send(newContent);
   });
 
   // Next.js 페이지 요청 처리
