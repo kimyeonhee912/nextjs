@@ -1,22 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "./api/api";
+import { getTasks } from "./api/api";
 
 export default function Page() {
   const [data, setData] = useState<any>(null);
-  console.log("🚀 ~ Home ~ data:", data);
 
   useEffect(() => {
-    const getTasks = async () => {
-      try {
-        const response = await api.get("/task");
-        setData(response.data);
-      } catch (error) {
-        console.error("에러발생", error);
-      }
+    const fetchData = async () => {
+      const tasks = await getTasks();
+      setData(tasks);
     };
-    getTasks();
+
+    fetchData();
   }, []);
 
   if (!data) {
@@ -25,8 +21,10 @@ export default function Page() {
 
   return (
     <div>
-      {data.map((task: any) => (
-        <div key={task.id}>{task.title}</div> // key prop 사용
+      {data?.map((task: any) => (
+        <div key={task.id}>
+          {task.id}번째: {task.title}
+        </div>
       ))}
     </div>
   );
