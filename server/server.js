@@ -75,6 +75,17 @@ app.prepare().then(() => {
     }
   });
 
+  server.delete("/api/task/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const idx = tasks.findIndex((task) => task.id === id);
+    if (idx >= 0) {
+      tasks.splice(idx, 1);
+      res.sendStatus(204);
+    } else {
+      res.status(404).send({ message: "cannot find given id" });
+    }
+  });
+
   // Next.js 페이지 요청 처리
   server.all("*", (req, res) => {
     return handle(req, res);

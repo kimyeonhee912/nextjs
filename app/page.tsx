@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  deleteTask,
   getTaskId,
   getTasks,
   getTasksAll,
@@ -31,8 +32,11 @@ export default function Page() {
       description: "강쥐 30분 산책",
       isComplete: true,
     };
-
     const addedTask = await patchTask(newTaskData);
+  };
+
+  const handleDeleteTask = async () => {
+    await deleteTask();
   };
 
   if (!data) {
@@ -46,8 +50,10 @@ export default function Page() {
           {task.id}번째: {task.title}
         </div>
       ))}
-
-      <button onClick={handleAddTask}>전송</button>
+      <div className="flex flex-col">
+        <button onClick={handleAddTask}>1번 전송</button>
+        <button onClick={handleDeleteTask}>1번 삭제하기</button>
+      </div>
     </div>
   );
 }
