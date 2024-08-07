@@ -60,6 +60,21 @@ app.prepare().then(() => {
     res.status(201).send(newContent);
   });
 
+  /* PATCH 요청 - DB 연결 전 */
+  server.patch("/api/task/:id", (req, res) => {
+    const id = Number(req.params.id);
+    const task = tasks.find((task) => task.id === id);
+    if (task) {
+      Object.keys(req.body).forEach((key) => {
+        task[key] = req.body[key];
+      });
+      task.updatedAt = new Date();
+      res.send(task);
+    } else {
+      res.status(404).send({ message: "cannot find given id" });
+    }
+  });
+
   // Next.js 페이지 요청 처리
   server.all("*", (req, res) => {
     return handle(req, res);

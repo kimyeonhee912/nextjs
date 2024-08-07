@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTaskId, getTasks, getTasksAll, postTask } from "./api/api";
+import {
+  getTaskId,
+  getTasks,
+  getTasksAll,
+  patchTask,
+  postTask,
+} from "./api/api";
 
 export default function Page() {
   const [data, setData] = useState<any>(null);
@@ -23,9 +29,10 @@ export default function Page() {
     const newTaskData = {
       title: "강쥐 산책",
       description: "강쥐 30분 산책",
+      isComplete: true,
     };
 
-    const addedTask = await postTask(newTaskData);
+    const addedTask = await patchTask(newTaskData);
   };
 
   if (!data) {
