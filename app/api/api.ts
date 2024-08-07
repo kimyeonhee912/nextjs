@@ -65,3 +65,11 @@ export const patchTask = async (data: any) => {
     console.error("에러발생", error);
   }
 };
+
+export const deleteTask = async () => {
+  try {
+    const response = await api.delete("/task/1");
+  } catch (error) {
+    console.error("에러발생", error);
+  }
+};
