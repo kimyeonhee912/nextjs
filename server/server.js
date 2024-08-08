@@ -4,10 +4,16 @@ import express from "express";
 import path from "path";
 import next from "next";
 import tasks from "./data/mock.js";
+import mongoose from "mongoose";
 
 const dev = true;
 const app = next({ dev });
 const handle = app.getRequestHandler();
+
+mongoose
+  .connect(`${process.env.NEXT_PUBLIC_DATABASE_URL}`)
+  .then(() => console.log("Connected to DB"))
+  .catch((err) => console.error("DB connection error:", err));
 
 app.prepare().then(() => {
   const server = express();
