@@ -20,14 +20,14 @@ export const getTasksAll = async () => {
 /* 쿼리스트링 */
 export const getTasks = async () => {
   try {
-    const response = await api.get("/task?sort=latest&count=3");
+    const response = await api.get("/task?sort=latest&count=2");
     return response.data;
   } catch (error) {
     console.error("에러발생", error);
   }
 };
 
-export const getTaskId = async (id: number) => {
+export const getTaskId = async (id: string) => {
   try {
     const response = await api.get(`/task/${id}`);
     return response.data;

@@ -3,7 +3,8 @@
 import express from "express";
 import path from "path";
 import next from "next";
-import tasks from "./data/mock.js";
+import mockTasks from "./data/mock.js";
+import Task from "./models/tasks.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
@@ -14,64 +15,65 @@ const handle = app.getRequestHandler();
 
 mongoose
   .connect(process.env.NEXT_PUBLIC_DATABASE_URL)
-  .then(() => console.log("Connected to DB"))
-  .catch((err) => console.error("DB connection error:", err));
+  .then(() => console.log("Connected to DB"));
 
 app.prepare().then(() => {
   const server = express();
   server.use(express.json());
 
   /* 쿼리 스트링 */
-  server.get("/api/task", (req, res) => {
+  server.get("/api/task", async (req, res) => {
     const sort = req.query.sort;
-    const count = Number(req.query.count);
+    const count = Number(req.query.count) || 0;
 
-    if (sort || count) {
-      const compareFn =
-        sort === "oldest"
-          ? (a, b) => a.createdAt - b.createdAt // 오래된 순
-          : (a, b) => b.createdAt - a.createdAt; // 최신 순
+    const sortOption = { createdAt: sort === "oldest" ? "asc" : "desc" };
+    const tasks = await Task.find().sort(sortOption).limit(count);
 
-      let newTasks = tasks.sort(compareFn);
-
-      // 정렬 후 개수 처리함. count 값이 있을 경우에는.
-      if (count) {
-        newTasks = newTasks.slice(0, count);
-      }
-      res.send(newTasks);
-    } else {
-      res.send(tasks);
-    }
+    res.send(tasks);
   });
 
   /* 다이나믹 URL */
-  server.get("/api/task/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const task = tasks.find((task) => task.id === id);
-    if (task) {
-      res.send(task);
+  server.get("/api/task/:id", async (req, res) => {
+    /* mongoDB에서 조회
+      1. id: 문자열
+      2. 비동기로 데이터 가져옴.
+      3. await Task.findById(id)는 쿼리를 리턴함. 즉, 조회(등)한 결과값을 리턴 
+      4. findById(id)는 하나만, find()는 전체를 리턴
+    */
+
+    const id = req.params.id;
+    const idIsValid = mongoose.isValidObjectId(id); //true or false
+
+    if (idIsValid) {
+      const task = await Task.findById(id);
+      if (task) {
+        res.send(task);
+      } else {
+        res.status(404).send({ message: "cannot find given id" });
+      }
     } else {
-      res.status(404).send({ message: "cannot find given id" });
+      //false면
+      res.status(404).send({ message: "is not valid ID" });
     }
   });
 
   /* POST 요청 - DB 연결 전 */
   server.post("/api/task", (req, res) => {
     const newContent = req.body;
-    const ids = tasks.map((task) => task.id);
+    const ids = mockTasks.map((task) => task.id);
     newContent.id = Math.max(...ids) + 1;
     newContent.isComplete = false;
     newContent.createdAt = new Date();
     newContent.updatedAt = new Date();
 
-    tasks.push(newContent);
+    mockTasks.push(newContent);
     res.status(201).send(newContent);
   });
 
   /* PATCH 요청 - DB 연결 전 */
   server.patch("/api/task/:id", (req, res) => {
     const id = Number(req.params.id);
-    const task = tasks.find((task) => task.id === id);
+    const task = mockTasks.find((task) => task.id === id);
     if (task) {
       Object.keys(req.body).forEach((key) => {
         task[key] = req.body[key];
@@ -85,9 +87,9 @@ app.prepare().then(() => {
 
   server.delete("/api/task/:id", (req, res) => {
     const id = Number(req.params.id);
-    const idx = tasks.findIndex((task) => task.id === id);
+    const idx = mockTasks.findIndex((task) => task.id === id);
     if (idx >= 0) {
-      tasks.splice(idx, 1);
+      mockTasks.splice(idx, 1);
       res.sendStatus(204);
     } else {
       res.status(404).send({ message: "cannot find given id" });
