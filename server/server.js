@@ -5,13 +5,15 @@ import path from "path";
 import next from "next";
 import tasks from "./data/mock.js";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
+dotenv.config({ path: ".env.local" });
 const dev = true;
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
 mongoose
-  .connect(`${process.env.NEXT_PUBLIC_DATABASE_URL}`)
+  .connect(process.env.NEXT_PUBLIC_DATABASE_URL)
   .then(() => console.log("Connected to DB"))
   .catch((err) => console.error("DB connection error:", err));
 
