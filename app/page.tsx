@@ -40,11 +40,11 @@ export default function Page() {
     event.preventDefault();
 
     const newTaskData = {
-      title: "강쥐 산책",
+      title: "강",
       description: "강쥐 30분 산책",
       isComplete: true,
     };
-    const addedTask = await patchTask(newTaskData);
+    const addedTask = await postTask(newTaskData);
   };
 
   const handleDeleteTask = async () => {
@@ -75,7 +75,7 @@ export default function Page() {
         선택한 아이디의 데이터: {selectIdData?.title}
       </div>
       <div className="flex flex-col">
-        <button onClick={handleAddTask}>1번 전송</button>
+        <button onClick={handleAddTask}>데이터 추가하기</button>
         <button onClick={handleDeleteTask}>1번 삭제하기</button>
       </div>
     </div>

@@ -21,7 +21,7 @@ app.prepare().then(() => {
   const server = express();
   server.use(express.json());
 
-  /* 쿼리 스트링 */
+  /* GET API - 전체 or 쿼리 */
   server.get("/api/task", async (req, res) => {
     const sort = req.query.sort;
     const count = Number(req.query.count) || 0;
@@ -32,15 +32,14 @@ app.prepare().then(() => {
     res.send(tasks);
   });
 
-  /* 다이나믹 URL */
+  /* GET API - 아이디 */
   server.get("/api/task/:id", async (req, res) => {
     /* mongoDB에서 조회
       1. id: 문자열
       2. 비동기로 데이터 가져옴.
       3. await Task.findById(id)는 쿼리를 리턴함. 즉, 조회(등)한 결과값을 리턴 
-      4. findById(id)는 하나만, find()는 전체를 리턴
+      4. findById(id)는 하나만, find()는 여러개를 리턴, findOne(조건)은 조건에 맞는 것의 하나만 리턴
     */
-
     const id = req.params.id;
     const idIsValid = mongoose.isValidObjectId(id); //true or false
 
@@ -57,20 +56,13 @@ app.prepare().then(() => {
     }
   });
 
-  /* POST 요청 - DB 연결 전 */
-  server.post("/api/task", (req, res) => {
-    const newContent = req.body;
-    const ids = mockTasks.map((task) => task.id);
-    newContent.id = Math.max(...ids) + 1;
-    newContent.isComplete = false;
-    newContent.createdAt = new Date();
-    newContent.updatedAt = new Date();
-
-    mockTasks.push(newContent);
+  /* POST API */
+  server.post("/api/task", async (req, res) => {
+    const newContent = await Task.create(req.body);
     res.status(201).send(newContent);
   });
 
-  /* PATCH 요청 - DB 연결 전 */
+  /* PATCH API - DB 연결 전 */
   server.patch("/api/task/:id", (req, res) => {
     const id = Number(req.params.id);
     const task = mockTasks.find((task) => task.id === id);
