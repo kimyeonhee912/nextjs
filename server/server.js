@@ -21,46 +21,65 @@ app.prepare().then(() => {
   const server = express();
   server.use(express.json());
 
+  function asyncHandler(handler) {
+    return async function (req, res) {
+      try {
+        await handler(req, res);
+      } catch (e) {
+        if (e.name === "ValidationError") {
+          res.status(400).send({ message: e.message });
+        } else if (e.name === "CastError") {
+          res.status(404).send({ message: "Cannot find given id" });
+        } else {
+          res.status(500).send({ message: e.message });
+        }
+      }
+    };
+  }
+
   /* GET API - 전체 or 쿼리 */
-  server.get("/api/task", async (req, res) => {
-    const sort = req.query.sort;
-    const count = Number(req.query.count) || 0;
+  server.get(
+    "/api/task",
+    asyncHandler(async (req, res) => {
+      const sort = req.query.sort;
+      const count = Number(req.query.count) || 0;
 
-    const sortOption = { createdAt: sort === "oldest" ? "asc" : "desc" };
-    const tasks = await Task.find().sort(sortOption).limit(count);
+      const sortOption = { createdAt: sort === "oldest" ? "asc" : "desc" };
+      const tasks = await Task.find().sort(sortOption).limit(count);
 
-    res.send(tasks);
-  });
+      res.send(tasks);
+    })
+  );
 
   /* GET API - 아이디 */
-  server.get("/api/task/:id", async (req, res) => {
-    /* mongoDB에서 조회
-      1. id: 문자열
-      2. 비동기로 데이터 가져옴.
-      3. await Task.findById(id)는 쿼리를 리턴함. 즉, 조회(등)한 결과값을 리턴 
-      4. findById(id)는 하나만, find()는 여러개를 리턴, findOne(조건)은 조건에 맞는 것의 하나만 리턴
-    */
-    const id = req.params.id;
-    const idIsValid = mongoose.isValidObjectId(id); //true or false
+  server.get(
+    "/api/task/:id",
+    asyncHandler(async (req, res) => {
+      const id = req.params.id;
+      const idIsValid = mongoose.isValidObjectId(id); //true or false
 
-    if (idIsValid) {
-      const task = await Task.findById(id);
-      if (task) {
-        res.send(task);
+      if (idIsValid) {
+        const task = await Task.findById(id);
+        if (task) {
+          res.send(task);
+        } else {
+          res.status(404).send({ message: "cannot find given id" });
+        }
       } else {
-        res.status(404).send({ message: "cannot find given id" });
+        //false면
+        res.status(404).send({ message: "is not valid ID" });
       }
-    } else {
-      //false면
-      res.status(404).send({ message: "is not valid ID" });
-    }
-  });
+    })
+  );
 
   /* POST API */
-  server.post("/api/task", async (req, res) => {
-    const newContent = await Task.create(req.body);
-    res.status(201).send(newContent);
-  });
+  server.post(
+    "/api/task",
+    asyncHandler(async (req, res) => {
+      const newContent = await Task.create(req.body);
+      res.status(201).send(newContent);
+    })
+  );
 
   /* PATCH API - DB 연결 전 */
   server.patch("/api/task/:id", (req, res) => {
@@ -77,6 +96,7 @@ app.prepare().then(() => {
     }
   });
 
+  /* DELETE API - DB 연결 전 */
   server.delete("/api/task/:id", (req, res) => {
     const id = Number(req.params.id);
     const idx = mockTasks.findIndex((task) => task.id === id);
