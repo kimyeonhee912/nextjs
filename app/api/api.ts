@@ -49,6 +49,7 @@ export const postTask = async (data: any) => {
 
 /* PATCH 요청 - 테스크 id로 요청 */
 export const patchTask = async (taskId: string, updatedTaskData: any) => {
+  console.log("🚀 ~ patchTask ~ updatedTaskData:", updatedTaskData);
   try {
     const response = await fetch(`http://localhost:3000/api/task/${taskId}`, {
       method: "PATCH",

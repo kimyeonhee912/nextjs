@@ -15,10 +15,16 @@ export default function Page() {
   const [selectData, setSelectData] = useState<any>(null);
   const [selectIdData, setSelectIdData] = useState<any>(null);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [selectedComplete, setSelectedComplete] = useState("false");
-  const [currentTaskId, setCurrentTaskId] = useState<string>("");
+  // 추가 폼 상태
+  const [addTitle, setAddTitle] = useState("");
+  const [addDescription, setAddDescription] = useState("");
+  const [addSelectedComplete, setAddSelectedComplete] = useState("false");
+
+  // 수정 폼 상태
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editSelectedComplete, setEditSelectedComplete] = useState("false");
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
@@ -40,17 +46,13 @@ export default function Page() {
     fetchSelectIdData("66b62b6c7ad3739ee2cd82ee");
   }, []);
 
-  const handleChange = (e: any) => {
-    setSelectedComplete(e.target.value);
-  };
-
   /* 추가 핸들러 */
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const newTaskData = {
-      title: title,
-      description: description,
-      isComplete: selectedComplete,
+      title: addTitle,
+      description: addDescription,
+      isComplete: addSelectedComplete,
     };
     await postTask(newTaskData);
   };
@@ -58,15 +60,15 @@ export default function Page() {
   /* 수정 핸들러  */
   const handleEditClick = (taskId: string) => {
     if (currentTaskId === taskId) {
-      setIsEditing((prev) => !prev); // 현재 상태를 반전시킵니다.
+      setIsEditing((prev) => !prev);
     } else {
       setCurrentTaskId(taskId);
       const taskToEdit = data?.find((task: any) => task._id === taskId);
       if (taskToEdit) {
-        setTitle(taskToEdit.title);
-        setDescription(taskToEdit.description);
-        setSelectedComplete(taskToEdit.isComplete ? "true" : "false");
-        setIsEditing(true); // 폼을 열어줍니다.
+        setEditTitle(taskToEdit.title);
+        setEditDescription(taskToEdit.description);
+        setEditSelectedComplete(taskToEdit.isComplete ? "true" : "false");
+        setIsEditing(true);
       }
     }
   };
@@ -75,10 +77,11 @@ export default function Page() {
     event.preventDefault();
     if (currentTaskId) {
       const updatedTaskData = {
-        title,
-        description,
-        isComplete: selectedComplete === "true",
+        title: editTitle,
+        description: editDescription,
+        isComplete: editSelectedComplete,
       };
+      console.log("🚀 ~ handleUpdateTask ~ updatedTaskData:", updatedTaskData);
       await patchTask(currentTaskId, updatedTaskData);
       setCurrentTaskId("");
       setIsEditing(false);
@@ -127,8 +130,8 @@ export default function Page() {
           <div className="flex m-2">
             <label>제목:</label>
             <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
               placeholder="제목입력"
               className="border ml-2"
             />
@@ -136,8 +139,8 @@ export default function Page() {
           <div className="flex m-2">
             <label>내용:</label>
             <input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
               placeholder="내용입력"
               className="border ml-2"
             />
@@ -149,8 +152,8 @@ export default function Page() {
                 type="radio"
                 name="isComplete"
                 value="true"
-                checked={selectedComplete === "true"}
-                onChange={(e) => setSelectedComplete(e.target.value)}
+                checked={editSelectedComplete === "true"}
+                onChange={(e) => setEditSelectedComplete(e.target.value)}
               />
               완료
             </label>
@@ -159,8 +162,8 @@ export default function Page() {
                 type="radio"
                 name="isComplete"
                 value="false"
-                checked={selectedComplete === "false"}
-                onChange={(e) => setSelectedComplete(e.target.value)}
+                checked={editSelectedComplete === "false"}
+                onChange={(e) => setEditSelectedComplete(e.target.value)}
               />
               미완료
             </label>
@@ -196,8 +199,8 @@ export default function Page() {
           <input
             placeholder="제목입력"
             className="border ml-2"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={addTitle}
+            onChange={(e) => setAddTitle(e.target.value)}
           />
         </div>
         <div className="flex m-2">
@@ -205,8 +208,8 @@ export default function Page() {
           <input
             placeholder="내용입력"
             className="border ml-2"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={addDescription}
+            onChange={(e) => setAddDescription(e.target.value)}
           />
         </div>
         <div className="flex m-2">
@@ -216,8 +219,8 @@ export default function Page() {
               type="radio"
               name="isComplete"
               value="true"
-              checked={selectedComplete === "true"}
-              onChange={handleChange}
+              checked={addSelectedComplete === "true"}
+              onChange={(e) => setAddSelectedComplete(e.target.value)}
             />
             완료
           </label>
@@ -227,8 +230,8 @@ export default function Page() {
               type="radio"
               name="isComplete"
               value="false"
-              checked={selectedComplete === "false"}
-              onChange={handleChange}
+              checked={addSelectedComplete === "false"}
+              onChange={(e) => setAddSelectedComplete(e.target.value)}
             />
             미완료
           </label>
