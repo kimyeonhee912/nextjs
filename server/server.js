@@ -1,9 +1,7 @@
 // server/server.js
 
 import express from "express";
-import path from "path";
 import next from "next";
-import mockTasks from "./data/mock.js";
 import Task from "./models/tasks.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -81,32 +79,37 @@ app.prepare().then(() => {
     })
   );
 
-  /* PATCH API - DB 연결 전 */
-  server.patch("/api/task/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const task = mockTasks.find((task) => task.id === id);
-    if (task) {
-      Object.keys(req.body).forEach((key) => {
-        task[key] = req.body[key];
-      });
-      task.updatedAt = new Date();
-      res.send(task);
-    } else {
-      res.status(404).send({ message: "cannot find given id" });
-    }
-  });
+  /* PATCH API  */
+  server.patch(
+    "/api/task/:id",
+    asyncHandler(async (req, res) => {
+      const id = req.params.id;
+      const task = await Task.findById(id);
+      if (task) {
+        Object.keys(req.body).forEach((key) => {
+          task[key] = req.body[key];
+        });
+        await task.save();
+        res.send(task);
+      } else {
+        res.status(404).send({ message: "cannot find given id" });
+      }
+    })
+  );
 
-  /* DELETE API - DB 연결 전 */
-  server.delete("/api/task/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const idx = mockTasks.findIndex((task) => task.id === id);
-    if (idx >= 0) {
-      mockTasks.splice(idx, 1);
-      res.sendStatus(204);
-    } else {
-      res.status(404).send({ message: "cannot find given id" });
-    }
-  });
+  /* DELETE API  */
+  server.delete(
+    "/api/task/:id",
+    asyncHandler(async (req, res) => {
+      const id = req.params.id;
+      const idx = await Task.findByIdAndDelete(id);
+      if (idx) {
+        res.sendStatus(204);
+      } else {
+        res.status(404).send({ message: "cannot find given id" });
+      }
+    })
+  );
 
   // Next.js 페이지 요청 처리
   server.all("*", (req, res) => {

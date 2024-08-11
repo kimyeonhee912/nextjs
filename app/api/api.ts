@@ -47,13 +47,16 @@ export const postTask = async (data: any) => {
 
 export const patchTask = async (data: any) => {
   try {
-    const response = await fetch("http://localhost:3000/api/task/1", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      "http://localhost:3000/api/task/66b773eda28e37897a862de1",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Error: ${response.statusText}`);
@@ -68,7 +71,7 @@ export const patchTask = async (data: any) => {
 
 export const deleteTask = async () => {
   try {
-    const response = await api.delete("/task/1");
+    const response = await api.delete("/task/66b773eda28e37897a862de1");
   } catch (error) {
     console.error("에러발생", error);
   }
