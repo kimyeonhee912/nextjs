@@ -1,9 +1,8 @@
 // server/server.js
 
 import express from "express";
-import path from "path";
 import next from "next";
-import tasks from "./data/mock.js";
+import Task from "./models/tasks.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
@@ -14,85 +13,103 @@ const handle = app.getRequestHandler();
 
 mongoose
   .connect(process.env.NEXT_PUBLIC_DATABASE_URL)
-  .then(() => console.log("Connected to DB"))
-  .catch((err) => console.error("DB connection error:", err));
+  .then(() => console.log("Connected to DB"));
 
 app.prepare().then(() => {
   const server = express();
   server.use(express.json());
 
-  /* 쿼리 스트링 */
-  server.get("/api/task", (req, res) => {
-    const sort = req.query.sort;
-    const count = Number(req.query.count);
-
-    if (sort || count) {
-      const compareFn =
-        sort === "oldest"
-          ? (a, b) => a.createdAt - b.createdAt // 오래된 순
-          : (a, b) => b.createdAt - a.createdAt; // 최신 순
-
-      let newTasks = tasks.sort(compareFn);
-
-      // 정렬 후 개수 처리함. count 값이 있을 경우에는.
-      if (count) {
-        newTasks = newTasks.slice(0, count);
+  function asyncHandler(handler) {
+    return async function (req, res) {
+      try {
+        await handler(req, res);
+      } catch (e) {
+        if (e.name === "ValidationError") {
+          res.status(400).send({ message: e.message });
+        } else if (e.name === "CastError") {
+          res.status(404).send({ message: "Cannot find given id" });
+        } else {
+          res.status(500).send({ message: e.message });
+        }
       }
-      res.send(newTasks);
-    } else {
+    };
+  }
+
+  /* GET API - 전체 or 쿼리 */
+  server.get(
+    "/api/task",
+    asyncHandler(async (req, res) => {
+      const sort = req.query.sort;
+      const count = Number(req.query.count) || 0;
+
+      const sortOption = { createdAt: sort === "oldest" ? "asc" : "desc" };
+      const tasks = await Task.find().sort(sortOption).limit(count);
+
       res.send(tasks);
-    }
-  });
+    })
+  );
 
-  /* 다이나믹 URL */
-  server.get("/api/task/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const task = tasks.find((task) => task.id === id);
-    if (task) {
-      res.send(task);
-    } else {
-      res.status(404).send({ message: "cannot find given id" });
-    }
-  });
+  /* GET API - 아이디 */
+  server.get(
+    "/api/task/:id",
+    asyncHandler(async (req, res) => {
+      const id = req.params.id;
+      const idIsValid = mongoose.isValidObjectId(id); //true or false
 
-  /* POST 요청 - DB 연결 전 */
-  server.post("/api/task", (req, res) => {
-    const newContent = req.body;
-    const ids = tasks.map((task) => task.id);
-    newContent.id = Math.max(...ids) + 1;
-    newContent.isComplete = false;
-    newContent.createdAt = new Date();
-    newContent.updatedAt = new Date();
+      if (idIsValid) {
+        const task = await Task.findById(id);
+        if (task) {
+          res.send(task);
+        } else {
+          res.status(404).send({ message: "cannot find given id" });
+        }
+      } else {
+        //false면
+        res.status(404).send({ message: "is not valid ID" });
+      }
+    })
+  );
 
-    tasks.push(newContent);
-    res.status(201).send(newContent);
-  });
+  /* POST API */
+  server.post(
+    "/api/task",
+    asyncHandler(async (req, res) => {
+      const newContent = await Task.create(req.body);
+      res.status(201).send(newContent);
+    })
+  );
 
-  /* PATCH 요청 - DB 연결 전 */
-  server.patch("/api/task/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const task = tasks.find((task) => task.id === id);
-    if (task) {
-      Object.keys(req.body).forEach((key) => {
-        task[key] = req.body[key];
-      });
-      task.updatedAt = new Date();
-      res.send(task);
-    } else {
-      res.status(404).send({ message: "cannot find given id" });
-    }
-  });
+  /* PATCH API  */
+  server.patch(
+    "/api/task/:id",
+    asyncHandler(async (req, res) => {
+      const id = req.params.id;
+      const task = await Task.findById(id);
+      if (task) {
+        Object.keys(req.body).forEach((key) => {
+          task[key] = req.body[key];
+        });
+        await task.save();
+        res.send(task);
+      } else {
+        res.status(404).send({ message: "cannot find given id" });
+      }
+    })
+  );
 
-  server.delete("/api/task/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const idx = tasks.findIndex((task) => task.id === id);
-    if (idx >= 0) {
-      tasks.splice(idx, 1);
-      res.sendStatus(204);
-    } else {
-      res.status(404).send({ message: "cannot find given id" });
-    }
-  });
+  /* DELETE API  */
+  server.delete(
+    "/api/task/:id",
+    asyncHandler(async (req, res) => {
+      const id = req.params.id;
+      const idx = await Task.findByIdAndDelete(id);
+      if (idx) {
+        res.sendStatus(204);
+      } else {
+        res.status(404).send({ message: "cannot find given id" });
+      }
+    })
+  );
 
   // Next.js 페이지 요청 처리
   server.all("*", (req, res) => {
