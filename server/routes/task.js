@@ -1,29 +1,16 @@
 import express from "express";
 import mongoose from "mongoose";
 import Task from "../models/tasks.js";
+import { asyncHandler } from "../utils/asyncErrorHandler.js";
 
 const TaskRouter = express.Router();
-
-function asyncHandler(handler) {
-  return async function (req, res) {
-    try {
-      await handler(req, res);
-    } catch (e) {
-      if (e.name === "ValidationError") {
-        res.status(400).send({ message: e.message });
-      } else if (e.name === "CastError") {
-        res.status(404).send({ message: "Cannot find given id" });
-      } else {
-        res.status(500).send({ message: e.message });
-      }
-    }
-  };
-}
 
 /* GET API - 전체 or 쿼리 */
 TaskRouter.get(
   "/",
   asyncHandler(async (req, res) => {
+    console.log("GET 요청", req.query);
+
     const sort = req.query.sort;
     const count = Number(req.query.count) || 0;
 
@@ -34,10 +21,23 @@ TaskRouter.get(
   })
 );
 
+/* POST API */
+TaskRouter.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    console.log("POST 요청", req.body);
+
+    const newContent = await Task.create(req.body);
+    res.status(201).send(newContent);
+  })
+);
+
 /* GET API - 아이디 */
 TaskRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
+    console.log("GET 요청 - 아이디");
+
     const id = req.params.id;
     const idIsValid = mongoose.isValidObjectId(id); //true or false
 
@@ -55,19 +55,12 @@ TaskRouter.get(
   })
 );
 
-/* POST API */
-TaskRouter.post(
-  "/",
-  asyncHandler(async (req, res) => {
-    const newContent = await Task.create(req.body);
-    res.status(201).send(newContent);
-  })
-);
-
 /* PATCH API  */
 TaskRouter.patch(
   "/:id",
   asyncHandler(async (req, res) => {
+    console.log("PATCH 요청");
+
     const id = req.params.id;
     const task = await Task.findById(id);
     if (task) {
@@ -86,6 +79,8 @@ TaskRouter.patch(
 TaskRouter.delete(
   "/:id",
   asyncHandler(async (req, res) => {
+    console.log("DELETE 요청");
+
     const id = req.params.id;
     const idx = await Task.findByIdAndDelete(id);
     if (idx) {
