@@ -2,4 +2,4 @@ GET http://localhost:3000/api/task
 
 ###
 
-GET http://localhost:3000/api/user
+GET http://localhost:3000/api/user/hello
