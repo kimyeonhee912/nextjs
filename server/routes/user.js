@@ -16,10 +16,7 @@ function greeting(req, res, next) {
 
 userRouter.get("/test", useNext, greeting);
 
-/* 
-use - 첫번째 파라미터 생략 가능
-all 
-*/
+/* use - 첫번째 파라미터 생략 가능 / all */
 userRouter.use("/hello", useNext);
 userRouter.all("/hello/hi", (req, res, next) => {
   console.log("all 메소드 사용");
@@ -31,6 +28,17 @@ userRouter.get("/hello/hi", (req, res) => {
 
 userRouter.post("/hello/hi", (req, res) => {
   console.log("post 메소드 사용");
+});
+
+/* 미들웨어로 req, res 다루기 */
+function authentication(req, res, next) {
+  req.user = "sungchan";
+  next();
+}
+
+userRouter.get("/me", authentication, (req, res, next) => {
+  console.log(req.user);
+  res.json({ user: req.user });
 });
 
 export default userRouter;

@@ -1,14 +1,11 @@
 GET http://localhost:3000/api/task
 
-
-###
-GET http://localhost:3000/api/user/hi
-
-###
-POST  http://localhost:3000/api/user/hi
-
 ###
 GET http://localhost:3000/api/user/hello/hi
 
 ###
 POST http://localhost:3000/api/user/hello/hi
+
+
+###
+GET http://localhost:3000/api/user/me
