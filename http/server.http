@@ -9,3 +9,6 @@ POST http://localhost:3000/api/user/hello/hi
 
 ###
 GET http://localhost:3000/api/user/me
+
+###
+GET http://localhost:3000/api/user/error

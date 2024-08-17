@@ -41,4 +41,20 @@ userRouter.get("/me", authentication, (req, res, next) => {
   res.json({ user: req.user });
 });
 
+/* 에러 처리하기 */
+function error(req, res, next) {
+  next(new Error("alert error"));
+  next();
+}
+
+function ok(req, res, next) {
+  res.json({ message: "good response" });
+}
+
+userRouter.get("/error", error, ok);
+userRouter.use((error, req, res, next) => {
+  console.log(error);
+  res.json({ message: "error handler" });
+});
+
 export default userRouter;
