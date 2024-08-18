@@ -81,7 +81,6 @@ export default function Page() {
         description: editDescription,
         isComplete: editSelectedComplete,
       };
-      console.log("🚀 ~ handleUpdateTask ~ updatedTaskData:", updatedTaskData);
       await patchTask(currentTaskId, updatedTaskData);
       setCurrentTaskId("");
       setIsEditing(false);

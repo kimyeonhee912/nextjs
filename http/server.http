@@ -1,0 +1,29 @@
+GET http://localhost:3000/api/task
+
+###
+GET http://localhost:3000/api/user/hello/hi
+
+###
+POST http://localhost:3000/api/user/hello/hi
+
+
+###
+GET http://localhost:3000/api/user/me
+
+###
+GET http://localhost:3000/api/user/error
+
+###
+POST http://localhost:3000/api/user/middleware
+Content-Type: application/json
+
+{
+    "name": "상품 1",
+    "price": 100
+}
+
+###
+POST http://localhost:3000/api/user/middleware
+Content-Type: application/x-www-form-urlencoded
+
+name=sungchan&age=20
