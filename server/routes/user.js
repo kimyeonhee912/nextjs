@@ -57,4 +57,10 @@ userRouter.use((error, req, res, next) => {
   res.json({ message: "error handler" });
 });
 
+userRouter.use(express.urlencoded({ extended: true }));
+userRouter.post("/middleware", (req, res, next) => {
+  console.log(req.body);
+  res.json({ message: "user 추가" });
+});
+
 export default userRouter;
