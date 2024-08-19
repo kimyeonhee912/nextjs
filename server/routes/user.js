@@ -1,7 +1,14 @@
 import express from "express";
 import { asyncHandler } from "../utils/asyncErrorHandler.js";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import cors from "cors";
+//import multer from "multer";
 
 const userRouter = express.Router();
+userRouter.use(cookieParser());
+userRouter.use(morgan("tiny"));
+userRouter.use(cors());
 
 function useNext(req, res, next) {
   console.log("---use 메소드 사용----");
@@ -57,10 +64,24 @@ userRouter.use((error, req, res, next) => {
   res.json({ message: "error handler" });
 });
 
+/* urlencoded */
 userRouter.use(express.urlencoded({ extended: true }));
 userRouter.post("/middleware", (req, res, next) => {
   console.log(req.body);
   res.json({ message: "user 추가" });
 });
+
+/* cookie-parser */
+userRouter.get("/cookie", (req, res) => {
+  console.log(req.cookies);
+  return res.json({ message: "안녕, 리스폰스" });
+});
+
+/* multer  */
+// const upload = multer({ dest: "uploads/" });
+
+// userRouter.post("/profile", upload.single("avatar"), function (req, res, next) {
+//   // ...
+// });
 
 export default userRouter;
