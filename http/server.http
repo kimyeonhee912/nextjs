@@ -27,3 +27,7 @@ POST http://localhost:3000/api/user/middleware
 Content-Type: application/x-www-form-urlencoded
 
 name=sungchan&age=20
+
+###
+GET http://localhost:3000/api/user/cookie
+Cookie: taste=chocolate
