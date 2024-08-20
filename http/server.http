@@ -31,3 +31,17 @@ name=sungchan&age=20
 ###
 GET http://localhost:3000/api/user/cookie
 Cookie: taste=chocolate
+
+###
+POST http://localhost:3000/api/user/profile
+Content-Type: multipart/form-data; boundary=Boundary01234567890123456789
+
+--Boundary01234567890123456789
+Content-Disposition: form-data; name="multerText"; filename="hello.txt"
+Content-Type: text/plain
+
+Hello!
+--Boundary01234567890123456789--
+
+###
+GET http://localhost:3000/41abc77282e8659f184e27c3c0f15972

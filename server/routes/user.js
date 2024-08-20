@@ -3,12 +3,13 @@ import { asyncHandler } from "../utils/asyncErrorHandler.js";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import cors from "cors";
-//import multer from "multer";
+import multer from "multer";
 
 const userRouter = express.Router();
 userRouter.use(cookieParser());
 userRouter.use(morgan("tiny"));
 userRouter.use(cors());
+userRouter.use(express.static("uploads"));
 
 function useNext(req, res, next) {
   console.log("---use 메소드 사용----");
@@ -78,10 +79,19 @@ userRouter.get("/cookie", (req, res) => {
 });
 
 /* multer  */
-// const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "uploads/" });
 
-// userRouter.post("/profile", upload.single("avatar"), function (req, res, next) {
-//   // ...
-// });
+userRouter.post(
+  "/profile",
+  upload.single("multerText"),
+  function (req, res, next) {
+    console.log(req.file);
+    res.json({ message: "complete file upload" });
+  }
+);
+
+userRouter.get("/profile", (req, res, next) => {
+  res.json({ message: "check user list" });
+});
 
 export default userRouter;
