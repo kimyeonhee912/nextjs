@@ -42,3 +42,6 @@ Content-Type: text/plain
 
 Hello!
 --Boundary01234567890123456789--
+
+###
+GET http://localhost:3000/41abc77282e8659f184e27c3c0f15972

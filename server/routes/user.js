@@ -9,6 +9,7 @@ const userRouter = express.Router();
 userRouter.use(cookieParser());
 userRouter.use(morgan("tiny"));
 userRouter.use(cors());
+userRouter.use(express.static("uploads"));
 
 function useNext(req, res, next) {
   console.log("---use 메소드 사용----");
@@ -88,5 +89,9 @@ userRouter.post(
     res.json({ message: "complete file upload" });
   }
 );
+
+userRouter.get("/profile", (req, res, next) => {
+  res.json({ message: "check user list" });
+});
 
 export default userRouter;
