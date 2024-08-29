@@ -19,7 +19,6 @@ mongoose
 app.prepare().then(() => {
   const server = express();
   server.use(express.json());
-  server.use(express.static("uploads"));
 
   // task 라우터 등록
   server.use("/api/task", TaskRouter);
