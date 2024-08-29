@@ -9,8 +9,10 @@ import {
   patchTask,
   postTask,
 } from "./api/api";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [selectData, setSelectData] = useState<any>(null);
   const [selectIdData, setSelectIdData] = useState<any>(null);
@@ -238,6 +240,13 @@ export default function Page() {
         </div>
         <button type="submit">추가하기</button>
       </form>
+      <button
+        onClick={() => {
+          router.push("/about");
+        }}
+      >
+        Go to About Page
+      </button>
     </div>
   );
 }

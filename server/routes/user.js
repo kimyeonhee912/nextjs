@@ -90,8 +90,4 @@ userRouter.post(
   }
 );
 
-userRouter.get("/profile", (req, res, next) => {
-  res.json({ message: "check user list" });
-});
-
 export default userRouter;
