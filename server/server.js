@@ -2,7 +2,8 @@
 
 import express from "express";
 import next from "next";
-import mongoose from "mongoose";
+import mongoose from "mongoose"; //mongoose 연결
+import mysql from "mysql2/promise"; //mysql 연결
 import dotenv from "dotenv";
 import TaskRouter from "./routes/task.js";
 import userRouter from "./routes/user.js";
@@ -15,6 +16,19 @@ const handle = app.getRequestHandler();
 mongoose
   .connect(process.env.NEXT_PUBLIC_DATABASE_URL)
   .then(() => console.log("Connected to DB"));
+
+// MySQL 연결 설정
+const mysqlConnection = await mysql.createConnection({
+  host: process.env.NEXT_PUBLIC_MYSQL_HOST,
+  user: process.env.NEXT_PUBLIC_MYSQL_USER,
+  password: process.env.NEXT_PUBLIC_MYSQL_PASSWORD,
+  database: process.env.NEXT_PUBLIC_MYSQL_DATABASE,
+});
+
+mysqlConnection
+  .connect()
+  .then(() => console.log("Connected to MySQL"))
+  .catch((err) => console.error("MySQL connection error:", err));
 
 app.prepare().then(() => {
   const server = express();
