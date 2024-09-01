@@ -7,6 +7,7 @@ import mysql from "mysql2/promise"; //mysql 연결
 import dotenv from "dotenv";
 import TaskRouter from "./routes/task.js";
 import userRouter from "./routes/user.js";
+import TestRouter from "./routes/testpost.js";
 
 dotenv.config({ path: ".env.local" });
 const dev = true;
@@ -37,6 +38,7 @@ app.prepare().then(() => {
   // task 라우터 등록
   server.use("/api/task", TaskRouter);
   server.use("/api/user", userRouter);
+  server.use("/api/test", TestRouter);
 
   // Next.js 페이지 요청 처리
   server.all("*", (req, res) => {
