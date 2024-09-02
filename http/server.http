@@ -51,5 +51,8 @@ POST http://localhost:3000/api/test/mysql-data
 Content-Type: application/json
 
 {
-  "content": "This is a test content"
+  "content": "test 1"
 }
+
+###
+GET http://localhost:3000/api/test/mysql-data

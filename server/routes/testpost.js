@@ -43,4 +43,21 @@ testRouter.post("/mysql-data", async (req, res) => {
   }
 });
 
+/* GET API */
+testRouter.get("/mysql-data", async (req, res) => {
+  console.log("GET 요청");
+
+  try {
+    // MySQL 데이터베이스에서 데이터를 조회합니다.
+    const [rows] = await mysqlConnection.execute("SELECT * FROM test_task");
+
+    res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.error("MySQL select error:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Database retrieval failed" });
+  }
+});
+
 export default testRouter;
