@@ -60,4 +60,28 @@ testRouter.get("/mysql-data", async (req, res) => {
   }
 });
 
+/* DELETE API */
+testRouter.delete("/mysql-data/:id", async (req, res) => {
+  console.log("DELETE 요청", req.params.id);
+
+  try {
+    // MySQL 데이터베이스에서 특정 ID의 데이터를 삭제합니다.
+    const [result] = await mysqlConnection.execute(
+      "DELETE FROM test_task WHERE id = ?",
+      [req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
+      res.status(404).json({ success: false, error: "Data not found" });
+    } else {
+      res
+        .status(200)
+        .json({ success: true, message: "Data deleted successfully" });
+    }
+  } catch (error) {
+    console.error("MySQL delete error:", error);
+    res.status(500).json({ success: false, error: "Database deletion failed" });
+  }
+});
+
 export default testRouter;
