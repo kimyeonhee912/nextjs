@@ -56,3 +56,6 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/api/test/mysql-data
+
+###
+DELETE http://localhost:3000/api/test/mysql-data/3
